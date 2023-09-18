@@ -64,18 +64,18 @@
   .welcome-main {
     padding: 2rem;
     transition: all 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    width: 100%;  /* Explicitly set to 100% when chat is not visible */
-    opacity: 1;  /* Fully visible */
+    width: 100%;  
+    opacity: 1;  
   }
   
   .welcome-main.shrink {
-    width: 40%;  /* Shrink to 40% when chat is visible */
-    opacity: 1;  /* Fully transparent */
+    width: 40%;  
+    opacity: 1; 
   }
   
   .chat-container {
     width: 100%;
-    transition: opacity 0.5s ease-in-out;  /* Add transition */
+    transition: opacity 0.5s ease-in-out;  
   }
   
   .chat-list {
@@ -113,7 +113,6 @@
     transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
   }
 
-  /* Styling for the search input */
 .search-input {
   width: 10%;
   padding: 0.5rem;
@@ -123,12 +122,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Add a hover effect */
 .search-input:hover {
   border-color: #999;
 }
 
-/* Add focus effect */
 .search-input:focus {
   border-color: #4CAF50;
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);

@@ -16,7 +16,7 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSendMessage();
-      e.preventDefault();  // Prevents the default action to stop the new line
+      e.preventDefault();  
     }
   };
 
@@ -46,7 +46,7 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
           placeholder="Type a message..." 
           value={newMessage}
           onChange={handleNewMessageChange}
-          onKeyDown={handleKeyDown}  // Adding this line
+          onKeyDown={handleKeyDown}  
 
         />
         <button onClick={handleSendMessage}>Send</button>
