@@ -3,8 +3,8 @@ import './WelcomePage.css';
 import ChatWindow from './ChatWindow';
 import moodLogo from './TheMood.png';
 import { searchForUsers, createNewChat,sendMessageToChat, fetchUserChats, db, getUserByUID } from './firebase';
-import { collection, getDocs, getDoc, doc} from "firebase/firestore";
-import { orderBy, query } from 'firebase/firestore';
+import { doc} from "firebase/firestore";
+import { onSnapshot } from "firebase/firestore";
 
 
 
@@ -17,6 +17,7 @@ const WelcomePage = ({ user }) => {
   const [chatMessages, setChatMessages] = useState({});
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [refreshChats, setRefreshChats] = useState(false);
+  const [unsubscribeFromChat, setUnsubscribeFromChat] = useState(null);
 
   
 
@@ -50,17 +51,22 @@ const WelcomePage = ({ user }) => {
   
   const openChat = (chatName) => {
     setShowChat(true);
-    console.log("openChat is called: chatname: ", chatName)
     setCurrentChatName(chatName);
     
     const chat = recentChats.find(c => c.name === chatName);
     if (chat && chat.id) {
-        fetchChatMessages(chat.id, chatName);
+      const unsubscribe = fetchChatMessages(chat.id, chatName);
+      setUnsubscribeFromChat(() => unsubscribe); // Store the unsubscribe function
     }
-};
+  };
+  
 
   const closeChat = () => {
     setShowChat(false);
+    if (unsubscribeFromChat) {
+        unsubscribeFromChat(); // Unsubscribe from real-time updates
+        setUnsubscribeFromChat(null); // Reset the unsubscribe function
+    }
   };
 
   const handleSearchChange = async (e) => {
@@ -106,31 +112,27 @@ const WelcomePage = ({ user }) => {
     }
   };
 
-  const fetchChatMessages = async (chatId, chatName) => {
+  const fetchChatMessages = (chatId, chatName) => {
     // Fetch messages from Firebase using chatId
-    const fetchedMessages = await yourFirebaseFetchFunction(chatId); // You need to implement yourFirebaseFetchFunction
-
-    // Update chatMessages state
-    setChatMessages(prevChatMessages => ({
-        ...prevChatMessages,
-        [chatName]: fetchedMessages
-    }));
-};
-
-const yourFirebaseFetchFunction = async (chatId) => {
-  const chatDocRef = doc(db, 'chats', chatId);
-  const chatSnapshot = await getDoc(chatDocRef);
+    const chatDocRef = doc(db, 'chats', chatId);
+    const unsubscribe = onSnapshot(chatDocRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const fetchedMessages = docSnapshot.data().messages || [];
+        
+        // Update chatMessages state
+        setChatMessages(prevChatMessages => ({
+            ...prevChatMessages,
+            [chatName]: fetchedMessages
+        }));
+      } else {
+        console.error("Chat with the given ID doesn't exist.");
+      }
+    });
   
-  if (!chatSnapshot.exists()) {
-      console.log("Chat with the given ID doesn't exist.");
-      return [];
-  }
-
-  const chatData = chatSnapshot.data();
-  const messages = chatData.messages || [];
-
-  return messages;  // This will return your array of messages
-};
+    // Cleanup listener on component unmount
+    return () => unsubscribe();
+  };
+  
 
   return (
     <div className="welcome-container">
@@ -190,3 +192,21 @@ const yourFirebaseFetchFunction = async (chatId) => {
 };
 
 export default WelcomePage;
+
+
+/*
+  const yourFirebaseFetchFunction = async (chatId) => {
+    const chatDocRef = doc(db, 'chats', chatId);
+    const chatSnapshot = await getDoc(chatDocRef);
+
+    if (!chatSnapshot.exists()) {
+        console.log("Chat with the given ID doesn't exist.");
+        return [];
+    }
+
+    const chatData = chatSnapshot.data();
+    const messages = chatData.messages || [];
+
+    return messages;  // This will return your array of messages
+  };
+*/

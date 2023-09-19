@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './ChatWindow.css';
 
 const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageSend }) => {
@@ -7,6 +7,15 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
   console.log("searchInterface-closeChat: ", searchInterface);
   console.log("messages-ChatWindow: ", messages);
   const [newMessage, setNewMessage] = useState("");
+  const messagesEndRef = useRef(null); // new
+
+  const scrollToBottom = () => { // new function
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => { // new useEffect
+    scrollToBottom();
+  }, [messages]);
 
   const handleNewMessageChange = (e) => {
     setNewMessage(e.target.value);
@@ -42,6 +51,7 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
             <div className="sent-message">{message}</div>
         </div>
     ))}
+    <div ref={messagesEndRef}></div>  {/* new */}
 </div>
       <div className="chat-input">
         <input 
