@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './WelcomePage.css';
 import ChatWindow from './ChatWindow';
 import moodLogo from './TheMood.png';
-import { searchForUsers, createNewChat, sendMessageToChat, fetchUserChats, getUserByUID } from './firebase';
+import { searchForUsers, createNewChat,sendMessageToChat, fetchUserChats, db, getUserByUID } from './firebase';
+import { collection, getDocs, getDoc, doc} from "firebase/firestore";
+import { orderBy, query } from 'firebase/firestore';
+
 
 
 
@@ -11,7 +14,6 @@ const WelcomePage = ({ user }) => {
   const [currentChatName, setCurrentChatName] = useState("");
   const [recentChats, setRecentChats] = useState([{name: "Alice", id: "chatId1"}, {name: "Bob", id: "chatId2"}]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredRecentChats, setFilteredRecentChats] = useState(recentChats);
   const [chatMessages, setChatMessages] = useState({});
   const [searchedUsers, setSearchedUsers] = useState([]);
   const [refreshChats, setRefreshChats] = useState(false);
@@ -32,17 +34,30 @@ const WelcomePage = ({ user }) => {
      });
      
      const chatData = await Promise.all(chatPromises);
+     console.log("chatData: ", chatData);
      setRecentChats(chatData);
      
     };
     
     fetchChats();
   }, [user.uid, refreshChats]);
+
+
+  useEffect(() => {
+    console.log("Updated recentChats: ", recentChats);
+  }, [recentChats]);
+
   
   const openChat = (chatName) => {
     setShowChat(true);
+    console.log("openChat is called: chatname: ", chatName)
     setCurrentChatName(chatName);
-  };
+    
+    const chat = recentChats.find(c => c.name === chatName);
+    if (chat && chat.id) {
+        fetchChatMessages(chat.id, chatName);
+    }
+};
 
   const closeChat = () => {
     setShowChat(false);
@@ -73,27 +88,49 @@ const WelcomePage = ({ user }) => {
   };
   
 
-  const handleRecentChatSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setFilteredRecentChats(recentChats.filter(chat => chat.name.toLowerCase().includes(query)));
-  };
-
   const handleNewMessageSend = (chatName, newMessage) => {
     // Update local chat messages state
     setChatMessages(prevChatMessages => {
-      const oldMessages = prevChatMessages[chatName] || [];
-      const newMessages = [...oldMessages, newMessage];
-      return { ...prevChatMessages, [chatName]: newMessages };
+        const oldMessages = prevChatMessages[chatName] || [];
+        const newMessages = [...oldMessages, newMessage];
+        return { ...prevChatMessages, [chatName]: newMessages };
     });
-  
+
     // Retrieve the chatId associated with chatName.
     const chat = recentChats.find(c => c.name === chatName);
     const chatId = chat ? chat.id : null;
-  
+
     if (chatId) {
-      sendMessageToChat(chatId, newMessage);
+        sendMessageToChat(chatId, newMessage);
+        fetchChatMessages(chatId, chatName);  // Fetch the updated messages
     }
   };
+
+  const fetchChatMessages = async (chatId, chatName) => {
+    // Fetch messages from Firebase using chatId
+    const fetchedMessages = await yourFirebaseFetchFunction(chatId); // You need to implement yourFirebaseFetchFunction
+
+    // Update chatMessages state
+    setChatMessages(prevChatMessages => ({
+        ...prevChatMessages,
+        [chatName]: fetchedMessages
+    }));
+};
+
+const yourFirebaseFetchFunction = async (chatId) => {
+  const chatDocRef = doc(db, 'chats', chatId);
+  const chatSnapshot = await getDoc(chatDocRef);
+  
+  if (!chatSnapshot.exists()) {
+      console.log("Chat with the given ID doesn't exist.");
+      return [];
+  }
+
+  const chatData = chatSnapshot.data();
+  const messages = chatData.messages || [];
+
+  return messages;  // This will return your array of messages
+};
 
   return (
     <div className="welcome-container">
@@ -104,15 +141,8 @@ const WelcomePage = ({ user }) => {
       </header>
       <main className={`welcome-main ${showChat ? 'shrink' : ''}`}>
         <div className="chat-container">
-          <h2 className="section-title">Recent Chats</h2>
-          <input 
-            type="text" 
-            className="search-input"
-            placeholder="Search Recent Chats..." 
-            onChange={handleRecentChatSearch}
-          />
           <ul className="chat-list">
-            {filteredRecentChats.map((chat) => (
+            {recentChats.map((chat) => (
               <li key={chat.id} onClick={() => openChat(chat.name)}>Chat with {chat.name}</li>
             ))}
           </ul>

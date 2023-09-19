@@ -1,13 +1,10 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, addDoc } from "firebase/firestore";
-import { query, collection, where, getDocs } from "firebase/firestore";
-import { updateDoc } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { 
+  getFirestore, doc, getDoc, setDoc, addDoc, 
+  query, collection, where, getDocs, updateDoc 
+} from "firebase/firestore";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAXzKiB8yEziAL1x07ilD-J6mqheq6WUFA",
   authDomain: "seniordesignminiprojectbu.firebaseapp.com",
@@ -18,101 +15,113 @@ const firebaseConfig = {
   measurementId: "G-3NLQRV2DVR"
 };
 
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore(app);
 
-// Helper Functions
 const getUserByUID = async (uid) => {
-  const userRef = doc(db, "users", uid);
-  const userSnapshot = await getDoc(userRef);
-  return userSnapshot.exists() ? userSnapshot.data() : null;
+  try {
+    const userRef = doc(db, "users", uid);
+    const userSnapshot = await getDoc(userRef);
+    return userSnapshot.exists() ? userSnapshot.data() : null;
+  } catch (error) {
+    console.error("Error fetching user by UID:", error);
+  }
 };
 
 const createUserInFirestore = async (uid, name, email) => {
-  const userRef = doc(db, "users", uid);
-  const user = { name, email };
-  await setDoc(userRef, user);
+  try {
+    const userRef = doc(db, "users", uid);
+    const user = { name, email };
+    await setDoc(userRef, user);
+  } catch (error) {
+    console.error("Error creating user in Firestore:", error);
+  }
 };
 
 const searchForUsers = async (searchTerm) => {
-  const usersRef = collection(db, "users");
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("name", "==", searchTerm));
 
-  // Searching by name or email
-  const q = query(usersRef, where("name", "==", searchTerm));
-
-  const querySnapshot = await getDocs(q);
-  const users = [];
-  querySnapshot.forEach((doc) => {
+    const querySnapshot = await getDocs(q);
+    const users = [];
+    querySnapshot.forEach((doc) => {
       users.push({ ...doc.data(), uid: doc.id });
-  });
+    });
 
-  if (users.length === 0) {
-      // If no users found by name, try searching by email
+    if (users.length === 0) {
       const qEmail = query(usersRef, where("email", "==", searchTerm));
       const emailQuerySnapshot = await getDocs(qEmail);
       emailQuerySnapshot.forEach((doc) => {
-          users.push({ ...doc.data(), uid: doc.id });
+        users.push({ ...doc.data(), uid: doc.id });
       });
-  }
+    }
 
-  return users;
+    return users;
+  } catch (error) {
+    console.error("Error searching for users:", error);
+  }
 };
 
-
 const fetchUserChats = async (uid) => {
-  const chatsRef = collection(db, "chats");
-  const q = query(chatsRef, where("members", "array-contains", uid));
-  
-  const querySnapshot = await getDocs(q);
-  const chats = [];
-  
-  querySnapshot.forEach((doc) => {
-    chats.push({ ...doc.data(), chatId: doc.id });
-  });
+  try {
+    const chatsRef = collection(db, "chats");
+    const q = query(chatsRef, where("members", "array-contains", uid));
 
-  return chats;
+    const querySnapshot = await getDocs(q);
+    const chats = [];
+    querySnapshot.forEach((doc) => {
+      chats.push({ ...doc.data(), chatId: doc.id });
+    });
+
+    return chats;
+  } catch (error) {
+    console.error("Error fetching user chats:", error);
+  }
 };
 
 const sendMessageToChat = async (chatId, message) => {
-  const chatRef = doc(db, "chats", chatId);
-  const chatDoc = await getDoc(chatRef);
-  if (chatDoc.exists()) {
+  try {
+    const chatRef = doc(db, "chats", chatId);
+    const chatDoc = await getDoc(chatRef);
+    if (chatDoc.exists()) {
       const currentMessages = chatDoc.data().messages;
       const updatedMessages = [...currentMessages, message];
       await updateDoc(chatRef, { messages: updatedMessages });
-  } else {
-      // Handle chat not existing
+    } else {
+      console.error("Chat does not exist for ID:", chatId);
+    }
+  } catch (error) {
+    console.error("Error sending message to chat:", error);
   }
 };
 
 const createNewChat = async (user1Id, user2Id) => {
-  const chatsRef = collection(db, "chats");
+  try {
+    const chatsRef = collection(db, "chats");
+    const membersHash = [user1Id, user2Id].sort().join('_');
 
-  // Generate membersHash
-  const membersHash = [user1Id, user2Id].sort().join('_');
+    const q = query(chatsRef, where("membersHash", "==", membersHash));
+    const querySnapshot = await getDocs(q);
 
-  // Check if a chat with the same membersHash exists
-  const q = query(chatsRef, where("membersHash", "==", membersHash));
-  const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs[0].id;
+    }
 
-  // If chat exists, return the existing chatId
-  if (!querySnapshot.empty) {
-    return querySnapshot.docs[0].id;
+    const newChat = {
+      members: [user1Id, user2Id],
+      membersHash: membersHash,
+      messages: []
+    };
+    const chatDocRef = await addDoc(chatsRef, newChat);
+    return chatDocRef.id;
+  } catch (error) {
+    console.error("Error creating new chat:", error);
   }
-
-  // Otherwise, create a new chat
-  const newChat = {
-    members: [user1Id, user2Id],
-    membersHash: membersHash,
-    messages: []
-  };
-  const chatDocRef = await addDoc(chatsRef, newChat);
-  return chatDocRef.id;  // Returns the ID of the newly created chat document
 };
 
-
-
-export { auth, db, getUserByUID, createUserInFirestore, searchForUsers, fetchUserChats, sendMessageToChat, createNewChat };
+export { 
+  auth, db, getUserByUID, createUserInFirestore, 
+  searchForUsers, fetchUserChats, sendMessageToChat, createNewChat 
+};

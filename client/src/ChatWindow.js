@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import './ChatWindow.css';
 
 const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageSend }) => {
+  console.log("chatName-chatWindow: ", chatName);
+  console.log("closeChat-closeChat: ", closeChat);
+  console.log("searchInterface-closeChat: ", searchInterface);
+  console.log("messages-ChatWindow: ", messages);
   const [newMessage, setNewMessage] = useState("");
 
   const handleNewMessageChange = (e) => {
@@ -33,13 +37,12 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
         </div>
       )}
      <div className="chat-messages">
-  {messages.map((message, index) => (
-    <div key={index}> {/* New block-level div */}
-      <div className="sent-message">{message}</div>
-    </div>
-  ))}
+    {messages.map((message, index) => (
+        <div key={index}>
+            <div className="sent-message">{message}</div>
+        </div>
+    ))}
 </div>
-
       <div className="chat-input">
         <input 
           type="text" 
