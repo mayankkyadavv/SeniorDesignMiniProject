@@ -94,20 +94,26 @@ const WelcomePage = ({ user }) => {
   };
   
 
-  const handleNewMessageSend = (chatName, newMessage) => {
+  const handleNewMessageSend = (chatName, newMessageText) => {
+    // Create a new message object with senderId and text
+    const newMessage = {
+        senderId: user.uid,
+        text: newMessageText
+    };
+
     // Update local chat messages state
     setChatMessages(prevChatMessages => {
         const oldMessages = prevChatMessages[chatName] || [];
-        const newMessages = [...oldMessages, newMessage];
-        return { ...prevChatMessages, [chatName]: newMessages };
+        const updatedMessages = [...oldMessages, newMessage];
+        return { ...prevChatMessages, [chatName]: updatedMessages };
     });
 
-    // Retrieve the chatId associated with chatName.
+    // Retrieve the chatId associated with chatName
     const chat = recentChats.find(c => c.name === chatName);
     const chatId = chat ? chat.id : null;
 
     if (chatId) {
-        sendMessageToChat(chatId, newMessage);
+        sendMessageToChat(chatId, newMessage); // Note that we're sending the message object now, not just the text
         fetchChatMessages(chatId, chatName);  // Fetch the updated messages
     }
   };
@@ -155,6 +161,7 @@ const WelcomePage = ({ user }) => {
           <ChatWindow 
             chatName={currentChatName}
             closeChat={closeChat}
+            user={user}
             messages={chatMessages[currentChatName] || []}
             onMessageSend={handleNewMessageSend}
             searchInterface={currentChatName === "New Chat" && (

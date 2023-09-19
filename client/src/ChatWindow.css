@@ -100,5 +100,27 @@
     display: inline-block; /* Back to inline-block */
   }
   
-  
+.message {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    max-width: 70%;
+}
+
+.message.sent {
+    align-self: flex-end;
+    background-color: #DCF8C6; /* You can choose your color */
+    border-bottom-right-radius: 0;
+}
+
+.message.received {
+    align-self: flex-start;
+    background-color: #EAEAEA; /* You can choose your color */
+    border-bottom-left-radius: 0;
+}
+
+.chat-messages {
+    display: flex;
+    flex-direction: column; /* Stack messages vertically */
+}
   

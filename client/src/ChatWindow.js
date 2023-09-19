@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ChatWindow.css';
 
-const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageSend }) => {
+const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageSend, user }) => {
   console.log("chatName-chatWindow: ", chatName);
   console.log("closeChat-closeChat: ", closeChat);
   console.log("searchInterface-closeChat: ", searchInterface);
@@ -47,11 +47,11 @@ const ChatWindow = ({ chatName, closeChat, searchInterface, messages, onMessageS
       )}
      <div className="chat-messages">
     {messages.map((message, index) => (
-        <div key={index}>
-            <div className="sent-message">{message}</div>
+        <div key={index} className={message.senderId === user.uid ? 'message sent' : 'message received'}>
+            {message.text}
         </div>
     ))}
-    <div ref={messagesEndRef}></div>  {/* new */}
+    <div ref={messagesEndRef}></div>
 </div>
       <div className="chat-input">
         <input 
