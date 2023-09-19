@@ -1,8 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, addDoc } from "firebase/firestore";
 import { query, collection, where, getDocs } from "firebase/firestore";
+import { updateDoc } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -61,5 +62,57 @@ const searchForUsers = async (searchTerm) => {
 };
 
 
-// Export for use in other files
-export { auth, db, getUserByUID, createUserInFirestore, searchForUsers };
+const fetchUserChats = async (uid) => {
+  const chatsRef = collection(db, "chats");
+  const q = query(chatsRef, where("members", "array-contains", uid));
+  
+  const querySnapshot = await getDocs(q);
+  const chats = [];
+  
+  querySnapshot.forEach((doc) => {
+    chats.push({ ...doc.data(), chatId: doc.id });
+  });
+
+  return chats;
+};
+
+const sendMessageToChat = async (chatId, message) => {
+  const chatRef = doc(db, "chats", chatId);
+  const chatDoc = await getDoc(chatRef);
+  if (chatDoc.exists()) {
+      const currentMessages = chatDoc.data().messages;
+      const updatedMessages = [...currentMessages, message];
+      await updateDoc(chatRef, { messages: updatedMessages });
+  } else {
+      // Handle chat not existing
+  }
+};
+
+const createNewChat = async (user1Id, user2Id) => {
+  const chatsRef = collection(db, "chats");
+
+  // Generate membersHash
+  const membersHash = [user1Id, user2Id].sort().join('_');
+
+  // Check if a chat with the same membersHash exists
+  const q = query(chatsRef, where("membersHash", "==", membersHash));
+  const querySnapshot = await getDocs(q);
+
+  // If chat exists, return the existing chatId
+  if (!querySnapshot.empty) {
+    return querySnapshot.docs[0].id;
+  }
+
+  // Otherwise, create a new chat
+  const newChat = {
+    members: [user1Id, user2Id],
+    membersHash: membersHash,
+    messages: []
+  };
+  const chatDocRef = await addDoc(chatsRef, newChat);
+  return chatDocRef.id;  // Returns the ID of the newly created chat document
+};
+
+
+
+export { auth, db, getUserByUID, createUserInFirestore, searchForUsers, fetchUserChats, sendMessageToChat, createNewChat };

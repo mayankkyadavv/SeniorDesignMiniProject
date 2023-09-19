@@ -130,3 +130,30 @@
   border-color: #4CAF50;
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
 }
+
+
+.search-dropdown {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  position: absolute;
+  width: calc(100% - 20px);  /* Slightly adjust the width */
+  left: 10px;  /* Slightly adjust the positioning */
+  top: 30px;  /* Adjust positioning so that it appears right below the search input */
+  z-index: 999;  /* Ensuring it's on top of everything else */
+  background-color: white;
+}
+
+.search-dropdown div {
+  padding: 5px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.search-dropdown div:last-child {
+  border-bottom: none;  /* Remove the bottom border for the last item */
+}
+
+.search-dropdown div:hover {
+  background-color: #f5f5f5;
+}
