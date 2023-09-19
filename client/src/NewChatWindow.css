@@ -53,3 +53,35 @@
     overflow-y: auto;
   }
   
+  .dropdown-results {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: absolute;
+    width: 90%;
+    left: 5%;
+    z-index: 1000; /* Ensures dropdown appears above other elements */
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #fff;
+    margin-top: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dropdown-results div {
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .dropdown-results div:hover {
+    background-color: #f6f6f6;
+  }
+  
+  .selected-user {
+    padding: 15px;
+    border-top: 1px solid #e6e6e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  

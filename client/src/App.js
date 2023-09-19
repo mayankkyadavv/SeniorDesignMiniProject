@@ -11,21 +11,30 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import moodLogo from './TheMood.png'; // Import the logo
-import { auth } from './firebase';
+import { auth, getUserByUID, createUserInFirestore } from './firebase';
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import WelcomePage from './WelcomePage';
 
 const App = () => {
   const [user, setUser] = useState(null);
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        setUser(result.user);
-      }).catch((error) => {
-        console.error(error);
-      });
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      setUser(user);
+
+      // Check if the user exists in Firestore
+      const existingUser = await getUserByUID(user.uid);
+
+      // If the user doesn't exist, create a new document for them in Firestore
+      if (!existingUser) {
+        await createUserInFirestore(user.uid, user.displayName, user.email);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
