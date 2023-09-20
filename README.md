@@ -9,3 +9,10 @@ Our senior design mini project is built using React and Firebase. It implements 
 3. Run 'npm install' to install all the dependancies
 4. Run 'npm start' to run the project
 5. go to 'http://localhost:3000/' to view the project
+
+   ##Video Demo:
+   
+
+https://github.com/hhijazibu/SeniorDesignMiniProject/assets/91743875/8bc650de-645a-4958-8ec4-98dc03dee516
+
+
