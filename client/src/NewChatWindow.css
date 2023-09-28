@@ -1,0 +1,87 @@
+.new-chat-window {
+    position: fixed;
+    bottom: 20px;
+    right: 400px;
+    width: 350px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .chat-header {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .chat-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+  }
+  
+  .chat-search input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .chat-search button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .chat-search button:hover {
+    background-color: #0056b3;
+  }
+  
+  .search-results {
+    padding: 15px;
+    /* Add a maximum height and scroll bar */
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .dropdown-results {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: absolute;
+    width: 90%;
+    left: 5%;
+    z-index: 1000; /* Ensures dropdown appears above other elements */
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #fff;
+    margin-top: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dropdown-results div {
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .dropdown-results div:hover {
+    background-color: #f6f6f6;
+  }
+  
+  .selected-user {
+    padding: 15px;
+    border-top: 1px solid #e6e6e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
